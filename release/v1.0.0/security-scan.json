@@ -1,0 +1,13 @@
+{
+  "gitleaks_version": "8.30.1",
+  "source_and_export_history_findings": 0,
+  "source_export_commit": "c898800e7dda51802282b3362b2ffc9ad44588c0",
+  "known_synthetic_secrets_compared": 3,
+  "known_secrets_found_in_source_or_payload": 0,
+  "embedded_manifest_checked": true,
+  "private_key_in_release": false,
+  "production_credentials_used": false,
+  "installer_signature_verified": true,
+  "runtime_installer_unchanged": true,
+  "vpn_payload_verdict": "UNCONFIRMED_CURL28"
+}
