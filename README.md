@@ -10,7 +10,7 @@
 
 [GitHub Release v1.0.0](https://github.com/HydraByHard/polaris-node-installer/releases/tag/v1.0.0) — prerelease для первого изолированного теста. Поддерживаются чистые Ubuntu Server22.04/24.04 AMD64; выполняйте команды в root native-консоли. Полноценная работа VPN не заявлена: CURL28 остаётся неразрешённым.
 
-Подписанные установочные файлы хранятся в версионированном каталоге [`release/v1.0.0`](release/v1.0.0). GitHub Release содержит ссылки на эти файлы. Нативный upload в Release Assets недоступен текущей runtime-авторизации (`uploads.github.com`:401); дополнительные repository-admin права для установки не нужны.
+Подписанные установочные файлы хранятся в версионированном каталоге [`release/v1.0.0`](https://github.com/HydraByHard/polaris-node-installer/tree/v1.0.0/release/v1.0.0). GitHub Release содержит ссылки на эти файлы. Нативный upload в Release Assets недоступен текущей runtime-авторизации (`uploads.github.com`:401); дополнительные repository-admin права для установки не нужны.
 
 Скачиваются installer, его Ed25519 signature и публичный ключ. Оба SHA256 ниже нужно закрепить из доверенного отчёта владельца; скачанный рядом checksum или ключ без сверки не доказывает подлинность.
 
