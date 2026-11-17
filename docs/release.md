@@ -22,3 +22,7 @@ PYTHONPATH=src python3 -m unittest discover -s tests -q
 В zipapp включаются только `.py`/`.json` из src/polaris_node, фиксируются timestamps и порядок. Лабораторные credentials, VM-образы, private evidence и рабочий каталог не упаковываются. Для будущего обновления владелец должен обеспечить безопасное хранение signing key либо явно опубликовать новый доверенный fingerprint. Потеря ключа не разрешает обходить проверку подлинности.
 
 Перед публикацией: Gitleaks с redaction, точечный поиск известных lab-секретов в source+распакованном payload, контроль package manifest, тесты, review. Приватный родительский follow-your-polaris и его история не становятся публичными: экспортируется только эта самостоятельная директория в новый репозиторий.
+
+## Доставка v1.0.0
+
+GitHub Release ссылается на подписанные файлы в `release/v1.0.0` по tag `v1.0.0`. Команды README проверяют два доверенных SHA256 и Ed25519 signature до исполнения. Нативные Release Assets не загружены: upload endpoint отклоняет текущую runtime-авторизацию с401. Пакет, manifest и signatures доступны как обычные versioned repository files; проверка подлинности не зависит от названия механизма доставки.

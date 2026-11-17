@@ -70,3 +70,5 @@
 Финальный556 artifact установлен на24 с точным CLI readback, прежними UUID/nativekey, ONLINE/LOCAL_CHECKS_PASS/hiddenHost. На22 финальный556 прошёл свежий ACME CLI и реальный установленный timer. Основная20-case матрица сохранена для5f с отдельно задокументированным единственным CA-client изменением.
 
 **Итог:**83 unit/release проверок PASS;54 регрессионных проверки родителя PASS;29 настоящих nativeAPI assertions PASS; обязательная инфраструктурная матрица и ACME timer PASS. Контролируемый VPN payload test остаётся неуспешным/неподтверждённым. Production не менялся.
+
+Publication delivery: push исходников и создание draft Release успешны. Upload endpoint вернул401 Bad credentials. Файлы выпуска помещены в versioned repository directory `release/v1.0.0`; после tag/publication выполняется отдельное unauthenticated скачивание и проверка всех файлов/подписей. Нативные asset attachments не заявляются загруженными. Это не изменяет результат CURL28.

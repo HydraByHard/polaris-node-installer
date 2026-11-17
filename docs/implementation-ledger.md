@@ -35,3 +35,5 @@ Ruling: сохраняем feature-ветку приватного родите�
 Ruling: controlled VPN timeout не назван Cloud-ограничением без доказательства. Код инфраструктуры завершён и пакет проверяем; статус только для изолированной первой проверки, без утверждения работоспособности VPN. Цена: до реального подтверждения Host должен оставаться скрытым.
 
 Publication continuation: владелец создал отдельный public repository и явно разрешил публикацию v1.0.0. Сохранены самостоятельная история экспорта, прежний installer556 и ограничение CURL28. Перед push/Release выполняются новые scans и package/signature checks; production не используется.
+
+Publication delivery ruling: текущая identity работает для API/Git, но uploads.github.com отклоняет её с401. Используем разрешённую запись в тот же репозиторий для доставки подписанных versioned files и ссылок из Release. Цена: файлы не являются нативными Release Assets; для таких attachments нужна отдельная рабочая upload-авторизация. Без обхода credential controls, без раскрытия секретов и без production changes.
