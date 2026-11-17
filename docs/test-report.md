@@ -59,7 +59,7 @@
 
 ## Публикация
 
-Github createRepository отклонён текущей интеграцией: Resource not accessible by integration. Репозиторий/релиз не созданы, существующий download URL не заявлен. Подписанный локальный пакет и точные шаги публикации подготовлены в docs/publish.md; владельцу нужно создать пустой public HydraByHard/polaris-node-installer и разрешить доступ интеграции.
+Владелец создал отдельный публичный HydraByHard/polaris-node-installer. При продолжении публикации повторно проверяются исходники, package members, воспроизводимость installer, SHA256, Ed25519 signatures и отсутствие секретов. [v1.0.0](https://github.com/HydraByHard/polaris-node-installer/releases/tag/v1.0.0) выпускается как prerelease; runtime installer остаётся byte-identical556a5ba3… . Матрица VM/API относится к предыдущим фактическим прогонам; production и VPS при публикации не используются. CURL28 остаётся INCONCLUSIVE, не объявляется исправленным.
 
 ## Итог controlled VPN probe
 

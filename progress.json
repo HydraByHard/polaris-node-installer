@@ -8,7 +8,7 @@
     "api_registrar": "complete;actualensure/idempotency/publish/unpublish/recoveryPASS",
     "system_cli": "complete;realUbuntu22/24and20failurematrixPASS",
     "vm_lab": "complete;final556Ubuntu24warmreadback+Ubuntu22freshACMEandinstalledtimerPASS;controlledVPNpayloadcurl28UNRESOLVED",
-    "release": "signedlocalpackage;GitHubcreateRepositoryDENIEDbyintegration;noexistingdownloadURL"
+    "release": "GitHub v1.0.0 prerelease publication; signed artifacts and source-only independent history; repeat secrets/package/signature checks"
   },
   "rulings": [
     "Native OTT is not enrollment. Use native1-day scoped create-only token onlyRAM; state exact expiry/reuse limitation, no false self-revocation claim.",
@@ -17,9 +17,14 @@
     "Developmenthas no authenticatedproductionAPIcredential; live metadata401 is recordedUNKNOWN, runtime muststrictlyverifyversionbeforemutations."
   ],
   "review": "5Important fixed RED->GREEN; Minor readability deferred; see docs/implementation-ledger.md",
-  "remaining": "Data-plane privateCA diagnosis; freshACME CLI/timer; finalexport+GitHubpublication",
+  "remaining": "CONTROLLED_VPN_PAYLOAD_TIMEOUT_CAUSE_UNRESOLVED; owner isolated live test required before Host publication",
   "blockers": [
-    "GITHUB_CREATE_REPOSITORY_PERMISSION",
     "CONTROLLED_VPN_PAYLOAD_TIMEOUT_CAUSE_UNRESOLVED"
-  ]
+  ],
+  "publication": {
+    "repository": "https://github.com/HydraByHard/polaris-node-installer",
+    "release": "https://github.com/HydraByHard/polaris-node-installer/releases/tag/v1.0.0",
+    "installer_sha256": "556a5ba3df35892cac49bf946fe8889640bea538522996a32e303544bdc5d69a",
+    "production_changes": "NONE"
+  }
 }

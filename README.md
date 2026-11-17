@@ -2,21 +2,23 @@
 
 Автономная подготовка **новой** Ubuntu VPS для Follow Your Polaris: Docker, официальный Remnawave Node, Xray VLESS/XHTTP `packet-up`, Nginx HTTPS/HTTP2, ACME, регистрация Node/Profile/Host. После установки Host **disabled + hidden**, не добавлен в существующий Squad и не попадает в текущие подписки.
 
-**Статус:** инфраструктура и автоматический ACME проверены на настоящих изолированных Ubuntu22/24. Полный VPN roundtrip пока **не подтверждён**: контрольный HTTPS-запрос через XHTTP завершился timeout, причина оставшегося сбоя не установлена. До проверки владельцем используйте только изолированного тестового пользователя и оставляйте основной Host скрытым. GitHub-публикация отдельно заблокирована правами интеграции.
+**Статус:** инфраструктура и автоматический ACME проверены на настоящих изолированных Ubuntu22/24. Полный VPN roundtrip пока **не подтверждён**: контрольный HTTPS-запрос через XHTTP завершился timeout, причина оставшегося сбоя не установлена. До проверки владельцем используйте только изолированного тестового пользователя и оставляйте основной Host скрытым. Релиз предназначен для изолированного первого теста; полноценный VPN пока не подтверждён.
 
 Поддерживаются Ubuntu Server **22.04 / 24.04 amd64**, systemd, ≥1 ГБ RAM (MemTotal ≥900 MiB и доступно ≥400 MiB), ≥4 ГБ свободного диска, 1 CPU. Проверенная матрица: Panel **3.4.11**, Node **3.4.6**, Xray **26.11.9**, Docker **29.9.2**, Compose **2.40.3**. Образы закреплены digest; другой Panel блокируется до записи. ARM и более новые версии Panel пока не заявлены.
 
-## Установка после однократной публикации релиза
+## Безопасная установка v1.0.0
 
-Хеш ниже должен быть получен из доверенного отчёта владельца. Файл SHA256SUMS из того же источника сам по себе не доказывает подлинность.
+[GitHub Release v1.0.0](https://github.com/HydraByHard/polaris-node-installer/releases/tag/v1.0.0) — prerelease для первого изолированного теста. Поддерживаются чистые Ubuntu Server22.04/24.04 AMD64; выполняйте команды в root native-консоли. Полноценная работа VPN не заявлена: CURL28 остаётся неразрешённым.
+
+Скачиваются installer, его Ed25519 signature и публичный ключ. Оба SHA256 ниже нужно закрепить из доверенного отчёта владельца; скачанный рядом checksum или ключ без сверки не доказывает подлинность.
 
 ```bash
-read -r -p 'HTTPS URL опубликованного polaris-install.sh: ' POLARIS_RELEASE_URL
-curl -fL --proto '=https' --tlsv1.2 -o polaris-install.sh "$POLARIS_RELEASE_URL" &&
-printf '%s  %s\n' 556a5ba3df35892cac49bf946fe8889640bea538522996a32e303544bdc5d69a polaris-install.sh | sha256sum -c - && sudo bash polaris-install.sh
+curl --fail --fail-early --location --proto '=https' --proto-redir '=https' --tlsv1.2 --remote-name 'https://github.com/HydraByHard/polaris-node-installer/releases/download/v1.0.0/{polaris-install.sh,polaris-install.sh.sig,release-signing-public.pem}' &&
+printf '%s  %s\n' 556a5ba3df35892cac49bf946fe8889640bea538522996a32e303544bdc5d69a polaris-install.sh 0ee4e2704e97c16fa647296eed27b7332bf382da498fe08d637b583a24cc2400 release-signing-public.pem | sha256sum -c - &&
+openssl pkeyutl -verify -rawin -pubin -inkey release-signing-public.pem -in polaris-install.sh -sigfile polaris-install.sh.sig && bash ./polaris-install.sh
 ```
 
-**GitHub-релиз пока не опубликован:** текущая интеграция отклонила createRepository. Рабочий download URL отсутствует. [Однократная публикация](docs/publish.md) требует создания пустого публичного репозитория владельцем. После публикации скопируйте фактический HTTPS URL asset из Releases в запрос выше. Исполнение происходит только после `OK`, через `&&`; под root `sudo` можно опустить. [Подпись и воспроизводимая сборка](docs/release.md).
+При любой ошибке цепочка `&&` остановится до исполнения. Ожидаются два `OK` и `Signature Verified Successfully`. Под пользователем с sudo замените последнюю команду на `sudo bash ./polaris-install.sh`. Не используйте `curl | bash` и не отключайте TLS verification. [Подпись, архивы и воспроизводимая сборка](docs/release.md).
 
 Установщик спросит имя (`finland-01`), страну (`FI`, `DE`, `NL`), новый домен, адрес Panel, IPv4 VPS и **фактический исходящий IPv4 Panel**. Для текущей прямой схемы последний — `208.123.185.211`; если появится NAT/CDN, его нужно проверить. Не указывайте IP CDN. Email ACME необязателен.
 

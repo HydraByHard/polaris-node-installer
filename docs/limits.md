@@ -15,4 +15,4 @@
 - До первой реальной установки owner должен подтвердить production metadata, actual Panel source-IP, DNS, provider firewall и Hiddify data plane. Разработка не затрагивает действующий VPN.
 
 - Контрольный VPN roundtrip в лаборатории не завершился: curl28 на двух изолированных целевых диапазонах. TLS/h2, XHTTP200 и доставка native-user подтверждены, исходящий HTTPS payload не получен. Причина оставшегося timeout не установлена; это не считается успешным VPN-тестом и не списывается на Cloud без доказательства.
-- GitHub createRepository запрещён текущей интеграцией. Публичного релиза/URL пока нет. Для обычной установки с GitHub сначала нужна однократная публикация владельцем по docs/publish.md.
+- Репозиторий создан владельцем; исходники и подписанные assets подготовлены для [v1.0.0](https://github.com/HydraByHard/polaris-node-installer/releases/tag/v1.0.0). Релиз имеет статус prerelease. Публикация не означает, что CURL28 устранён или полноценный VPN проверен.
