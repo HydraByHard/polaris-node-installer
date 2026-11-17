@@ -1,0 +1,864 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-11-17",
+  "environment": "Disposable synthetic Docker lab; loopback TLS gateway and isolated VM bridge only",
+  "productionAccess": "NONE: no production network calls, credentials, SSH or changes",
+  "verifiedCompatibility": {
+    "panel": {
+      "version": "3.4.11",
+      "build": {
+        "time": "2026-11-14T00:48:04Z",
+        "number": "230"
+      },
+      "git": {
+        "backend": {
+          "commitSha": "6853666801d6d1925b6aec55824106100485777a",
+          "branch": "main",
+          "commitUrl": "https://github.com/remnawave/backend/commit/6853666801d6d1925b6aec55824106100485777a"
+        },
+        "frontend": {
+          "commitSha": "20fabab0d788af97273d646614c6b9980f6f29d1",
+          "commitUrl": "https://github.com/remnawave/frontend/commit/20fabab0d788af97273d646614c6b9980f6f29d1"
+        }
+      }
+    },
+    "node": {
+      "xray": "26.11.9",
+      "node": "3.4.6"
+    },
+    "otherPanelVersions": "Unsupported until independently tested. Installer must fail closed outside exact tested version."
+  },
+  "authentication": {
+    "nativeApiRole": "Authorization: Bearer <temporary API JWT>; browser header not needed",
+    "adminSession": "Token create/list/scopes/delete require ADMIN JWT and X-Remnawave-Client-Type: browser. API role receives403 even with DELETE permission guesses.",
+    "apiTokenClaims": [
+      "uuid",
+      "username",
+      "role",
+      "iat",
+      "exp"
+    ],
+    "scopesInJwt": false,
+    "scopeStorage": "Panel database; JWT claims do not enumerate effective scopes",
+    "tokenCreation": {
+      "method": "POST",
+      "path": "/api/tokens",
+      "body": {
+        "name": "descriptive string",
+        "expiresInDays": 1,
+        "scopes": [
+          "system:metadata",
+          "nodes:list",
+          "nodes:get",
+          "nodes:create",
+          "config-profiles:list",
+          "config-profiles:get",
+          "config-profiles:create",
+          "keygen:get",
+          "hosts:list",
+          "hosts:create"
+        ]
+      },
+      "minimumExpiryDays": 1,
+      "invalidScopeStatus": 400,
+      "zeroDayExpiryStatus": 400
+    },
+    "tokenRevocation": {
+      "method": "DELETE",
+      "path": "/api/tokens/{uuid}",
+      "success": 204,
+      "adminOnly": true,
+      "apiSelfRevocation": false
+    },
+    "nativeOtt": "POST /api/tokens/ott is for short-lived Swagger/Scalar/Bull Board backend tools access, not one-time Node enrollment.",
+    "apiTokenCanInspectScopeCatalog": false
+  },
+  "enrollmentScopes": [
+    "system:metadata",
+    "nodes:list",
+    "nodes:get",
+    "nodes:create",
+    "config-profiles:list",
+    "config-profiles:get",
+    "config-profiles:create",
+    "keygen:get",
+    "hosts:list",
+    "hosts:create"
+  ],
+  "publishScopes": [
+    "system:metadata",
+    "nodes:get",
+    "config-profiles:get",
+    "hosts:get",
+    "hosts:update",
+    "internal-squads:list",
+    "internal-squads:get",
+    "internal-squads:update"
+  ],
+  "rollbackScopes": [
+    "hosts:delete",
+    "nodes:delete",
+    "config-profiles:delete"
+  ],
+  "responseWrappers": {
+    "GET /api/system/metadata": "{response:{version,build:{time,number},git:{backend,frontend}}}; authentication required401 withouttoken",
+    "GET /api/nodes": "{response:[node,...]}",
+    "GET /api/nodes/{uuid}": "{response:node}; fields isConnected,isConnecting,isDisabled,xrayUptime,lastStatusMessage,versions:{node,xray}",
+    "GET /api/config-profiles": "{response:{total,configProfiles:[profile,...]}}",
+    "GET /api/config-profiles/{uuid}": "{response:profile}; includes config and inbounds:[{uuid,tag,...}]",
+    "GET /api/hosts": "{response:[host,...]}",
+    "GET /api/internal-squads": "{response:{total,internalSquads:[squad,...]}}",
+    "GET /api/internal-squads/{uuid}": "{response:squad}; inbounds is an array of inbound objects containing uuid",
+    "POST /api/users": "{response:user}; numeric id field, no uuid field in tested3.4.11. Enrollment/publish requires no users access."
+  },
+  "nodeKeygen": {
+    "method": "GET",
+    "path": "/api/keygen",
+    "scope": "keygen:get",
+    "responseFields": [
+      "secretKey",
+      "pubKey"
+    ],
+    "secretKeyFormat": "Base64-encoded JSON",
+    "payloadFields": [
+      "nodeCertPem",
+      "nodeKeyPem",
+      "caCertPem",
+      "jwtPublicKey"
+    ],
+    "verified": "Successive requests mint different per-node certificate/private key; CA certificate remains shared; CA private key absent. Never log or commit payload."
+  },
+  "createProfile": {
+    "method": "POST",
+    "path": "/api/config-profiles",
+    "scope": "config-profiles:create",
+    "nameConstraints": "2..30 ASCII letters/numbers/underscore/space/hyphen",
+    "body": {
+      "name": "PNI isolated profile",
+      "config": {
+        "log": {
+          "loglevel": "warning"
+        },
+        "inbounds": [
+          {
+            "tag": "pni-owned-inbound",
+            "listen": "127.0.0.1",
+            "port": 8082,
+            "protocol": "vless",
+            "settings": {
+              "clients": [],
+              "decryption": "none"
+            },
+            "streamSettings": {
+              "network": "xhttp",
+              "security": "none",
+              "xhttpSettings": {
+                "path": "/unique-node-path/",
+                "mode": "packet-up"
+              }
+            }
+          }
+        ],
+        "outbounds": [
+          {
+            "tag": "direct",
+            "protocol": "freedom"
+          }
+        ]
+      }
+    }
+  },
+  "createNode": {
+    "method": "POST",
+    "path": "/api/nodes",
+    "scope": "nodes:create",
+    "body": {
+      "name": "new-node-name",
+      "address": "new-node-domain",
+      "port": 2222,
+      "countryCode": "FI",
+      "tags": [
+        "PNI_OWNED_MARKER"
+      ],
+      "configProfile": {
+        "activeConfigProfileUuid": "<new profile uuid>",
+        "activeInbounds": [
+          "<new inbound uuid>"
+        ]
+      }
+    },
+    "nameConstraints": "3..30 characters"
+  },
+  "createHost": {
+    "method": "POST",
+    "path": "/api/hosts",
+    "scope": "hosts:create",
+    "body": {
+      "remark": "PNI unique ownership marker",
+      "address": "new-node-domain",
+      "port": 443,
+      "path": "/unique-node-path/",
+      "sni": "new-node-domain",
+      "host": "new-node-domain",
+      "alpn": "h2",
+      "securityLayer": "TLS",
+      "isDisabled": true,
+      "isHidden": true,
+      "nodes": [
+        "<new node uuid>"
+      ],
+      "inbound": {
+        "configProfileUuid": "<new profile uuid>",
+        "configProfileInboundUuid": "<new inbound uuid>"
+      },
+      "xhttpExtraParams": {
+        "mode": "packet-up"
+      }
+    },
+    "verifiedIsolation": "Existing Host/profile/Polaris personal inbounds/user identities and subscription URL unchanged; no enrollment Squad mutation."
+  },
+  "publish": {
+    "precondition": "Separate owner-confirmed operation with separate temporary publication scopes. Read latest Squad immediately before mutation.",
+    "squad": {
+      "method": "PATCH",
+      "path": "/api/internal-squads",
+      "scope": "internal-squads:update",
+      "body": {
+        "uuid": "<Polaris personal uuid>",
+        "inbounds": [
+          "<every existing inbound uuid retained>",
+          "<owned new inbound uuid>"
+        ]
+      },
+      "semantics": "Replaces entire inbounds array; there is no append command. Union existing UUIDs, detect concurrent changes, never replace with new-only list."
+    },
+    "host": {
+      "method": "PATCH",
+      "path": "/api/hosts",
+      "scope": "hosts:update",
+      "body": {
+        "uuid": "<owned Host uuid>",
+        "isDisabled": false,
+        "isHidden": false
+      }
+    },
+    "unpublish": "PATCH exactly the owned Host isDisabled:true,isHidden:true; do not remove old Squad permissions or users."
+  },
+  "remoteRollback": {
+    "precondition": "Explicit owner confirmation; verify local owned UUIDs against remote marker and relationships; delete only own resources",
+    "sequence": [
+      "DELETE /api/hosts/{ownedUuid}",
+      "DELETE /api/nodes/{ownedUuid}",
+      "DELETE /api/config-profiles/{ownedUuid}"
+    ],
+    "successStatus": 204,
+    "forbiddenForEnrollment": true
+  },
+  "catalog": {
+    "wildcard": "*",
+    "resources": [
+      {
+        "resource": "nodes",
+        "resourceScopes": [
+          "nodes:*",
+          "nodes:read",
+          "nodes:write"
+        ],
+        "endpoints": [
+          {
+            "key": "nodes:list-tags",
+            "kind": "read",
+            "method": "GET",
+            "path": "/api/nodes/tags",
+            "description": "Get nodes tags"
+          },
+          {
+            "key": "nodes:create",
+            "kind": "write",
+            "method": "POST",
+            "path": "/api/nodes",
+            "description": "Create a new node"
+          },
+          {
+            "key": "nodes:list",
+            "kind": "read",
+            "method": "GET",
+            "path": "/api/nodes",
+            "description": "Get nodes"
+          },
+          {
+            "key": "nodes:get",
+            "kind": "read",
+            "method": "GET",
+            "path": "/api/nodes/{uuid}",
+            "description": "Get node by UUID"
+          },
+          {
+            "key": "nodes:enable",
+            "kind": "write",
+            "method": "POST",
+            "path": "/api/nodes/{uuid}/actions/enable",
+            "description": "Enable a node"
+          },
+          {
+            "key": "nodes:disable",
+            "kind": "write",
+            "method": "POST",
+            "path": "/api/nodes/{uuid}/actions/disable",
+            "description": "Disable a node"
+          },
+          {
+            "key": "nodes:delete",
+            "kind": "write",
+            "method": "DELETE",
+            "path": "/api/nodes/{uuid}",
+            "description": "Delete a node"
+          },
+          {
+            "key": "nodes:update",
+            "kind": "write",
+            "method": "PATCH",
+            "path": "/api/nodes",
+            "description": "Update node"
+          },
+          {
+            "key": "nodes:restart",
+            "kind": "write",
+            "method": "POST",
+            "path": "/api/nodes/{uuid}/actions/restart",
+            "description": "Restart node"
+          },
+          {
+            "key": "nodes:reset-traffic",
+            "kind": "write",
+            "method": "POST",
+            "path": "/api/nodes/{uuid}/actions/reset-traffic",
+            "description": "Reset Node Traffic"
+          },
+          {
+            "key": "nodes:restart-all",
+            "kind": "write",
+            "method": "POST",
+            "path": "/api/nodes/actions/restart-all",
+            "description": "Restart all nodes"
+          },
+          {
+            "key": "nodes:reorder",
+            "kind": "write",
+            "method": "POST",
+            "path": "/api/nodes/actions/reorder",
+            "description": "Reorder nodes"
+          },
+          {
+            "key": "nodes:bulk-profile-modification",
+            "kind": "write",
+            "method": "POST",
+            "path": "/api/nodes/bulk-actions/profile-modification",
+            "description": "Modify Inbounds & Profile for many nodes"
+          },
+          {
+            "key": "nodes:bulk-actions",
+            "kind": "write",
+            "method": "POST",
+            "path": "/api/nodes/bulk-actions",
+            "description": "Perform actions for many nodes"
+          },
+          {
+            "key": "nodes:bulk-update",
+            "kind": "write",
+            "method": "POST",
+            "path": "/api/nodes/bulk-actions/update",
+            "description": "Update many nodes"
+          }
+        ]
+      },
+      {
+        "resource": "config-profiles",
+        "resourceScopes": [
+          "config-profiles:*",
+          "config-profiles:read",
+          "config-profiles:write"
+        ],
+        "endpoints": [
+          {
+            "key": "config-profiles:list-tags",
+            "kind": "read",
+            "method": "GET",
+            "path": "/api/config-profiles/tags",
+            "description": "Get tags of Config Profiles"
+          },
+          {
+            "key": "config-profiles:set-tags",
+            "kind": "write",
+            "method": "PATCH",
+            "path": "/api/config-profiles/tags",
+            "description": "Set tags of Config Profile"
+          },
+          {
+            "key": "config-profiles:list",
+            "kind": "read",
+            "method": "GET",
+            "path": "/api/config-profiles",
+            "description": "Get config profiles"
+          },
+          {
+            "key": "config-profiles:list-inbounds",
+            "kind": "read",
+            "method": "GET",
+            "path": "/api/config-profiles/inbounds",
+            "description": "Get all inbounds from all config profiles"
+          },
+          {
+            "key": "config-profiles:list-profile-inbounds",
+            "kind": "read",
+            "method": "GET",
+            "path": "/api/config-profiles/{uuid}/inbounds",
+            "description": "Get inbounds by profile uuid"
+          },
+          {
+            "key": "config-profiles:get",
+            "kind": "read",
+            "method": "GET",
+            "path": "/api/config-profiles/{uuid}",
+            "description": "Get config profile by uuid"
+          },
+          {
+            "key": "config-profiles:get-computed",
+            "kind": "read",
+            "method": "GET",
+            "path": "/api/config-profiles/{uuid}/computed-config",
+            "description": "Get computed config profile by uuid"
+          },
+          {
+            "key": "config-profiles:delete",
+            "kind": "write",
+            "method": "DELETE",
+            "path": "/api/config-profiles/{uuid}",
+            "description": "Delete config profile"
+          },
+          {
+            "key": "config-profiles:create",
+            "kind": "write",
+            "method": "POST",
+            "path": "/api/config-profiles",
+            "description": "Create config profile"
+          },
+          {
+            "key": "config-profiles:update",
+            "kind": "write",
+            "method": "PATCH",
+            "path": "/api/config-profiles",
+            "description": "Update Core Config in specific config profile"
+          },
+          {
+            "key": "config-profiles:reorder",
+            "kind": "write",
+            "method": "POST",
+            "path": "/api/config-profiles/actions/reorder",
+            "description": "Reorder config profiles"
+          }
+        ]
+      },
+      {
+        "resource": "internal-squads",
+        "resourceScopes": [
+          "internal-squads:*",
+          "internal-squads:read",
+          "internal-squads:write"
+        ],
+        "endpoints": [
+          {
+            "key": "internal-squads:list-tags",
+            "kind": "read",
+            "method": "GET",
+            "path": "/api/internal-squads/tags",
+            "description": "Get tags of Internal Squads"
+          },
+          {
+            "key": "internal-squads:set-tags",
+            "kind": "write",
+            "method": "PATCH",
+            "path": "/api/internal-squads/tags",
+            "description": "Set tags of Internal Squad"
+          },
+          {
+            "key": "internal-squads:list",
+            "kind": "read",
+            "method": "GET",
+            "path": "/api/internal-squads",
+            "description": "Get all internal squads"
+          },
+          {
+            "key": "internal-squads:get",
+            "kind": "read",
+            "method": "GET",
+            "path": "/api/internal-squads/{uuid}",
+            "description": "Get internal squad by uuid"
+          },
+          {
+            "key": "internal-squads:create",
+            "kind": "write",
+            "method": "POST",
+            "path": "/api/internal-squads",
+            "description": "Create internal squad"
+          },
+          {
+            "key": "internal-squads:accessible-nodes",
+            "kind": "read",
+            "method": "GET",
+            "path": "/api/internal-squads/{uuid}/accessible-nodes",
+            "description": "Get internal squad accessible nodes"
+          },
+          {
+            "key": "internal-squads:internal-squad-usage",
+            "kind": "read",
+            "method": "GET",
+            "path": "/api/internal-squads/{uuid}/usage",
+            "description": "Get internal squad users traffic usage for a period"
+          },
+          {
+            "key": "internal-squads:update",
+            "kind": "write",
+            "method": "PATCH",
+            "path": "/api/internal-squads",
+            "description": "Update internal squad"
+          },
+          {
+            "key": "internal-squads:delete",
+            "kind": "write",
+            "method": "DELETE",
+            "path": "/api/internal-squads/{uuid}",
+            "description": "Delete internal squad"
+          },
+          {
+            "key": "internal-squads:add-users",
+            "kind": "write",
+            "method": "POST",
+            "path": "/api/internal-squads/{uuid}/bulk-actions/add-users",
+            "description": "Add all users to internal squad"
+          },
+          {
+            "key": "internal-squads:remove-users",
+            "kind": "write",
+            "method": "DELETE",
+            "path": "/api/internal-squads/{uuid}/bulk-actions/remove-users",
+            "description": "Delete users from internal squad"
+          },
+          {
+            "key": "internal-squads:reorder",
+            "kind": "write",
+            "method": "POST",
+            "path": "/api/internal-squads/actions/reorder",
+            "description": "Reorder internal squads"
+          },
+          {
+            "key": "internal-squads:add-many-users",
+            "kind": "write",
+            "method": "POST",
+            "path": "/api/internal-squads/{uuid}/bulk-actions/add-many-users",
+            "description": "Add many users to internal squad"
+          },
+          {
+            "key": "internal-squads:remove-many-users",
+            "kind": "write",
+            "method": "DELETE",
+            "path": "/api/internal-squads/{uuid}/bulk-actions/remove-many-users",
+            "description": "Delete many users from internal squad"
+          }
+        ]
+      },
+      {
+        "resource": "hosts",
+        "resourceScopes": [
+          "hosts:*",
+          "hosts:read",
+          "hosts:write"
+        ],
+        "endpoints": [
+          {
+            "key": "hosts:list-tags",
+            "kind": "read",
+            "method": "GET",
+            "path": "/api/hosts/tags",
+            "description": "Get tags of hosts"
+          },
+          {
+            "key": "hosts:create",
+            "kind": "write",
+            "method": "POST",
+            "path": "/api/hosts",
+            "description": "Create a new host"
+          },
+          {
+            "key": "hosts:update",
+            "kind": "write",
+            "method": "PATCH",
+            "path": "/api/hosts",
+            "description": "Update a host"
+          },
+          {
+            "key": "hosts:list",
+            "kind": "read",
+            "method": "GET",
+            "path": "/api/hosts",
+            "description": "Get hosts"
+          },
+          {
+            "key": "hosts:get",
+            "kind": "read",
+            "method": "GET",
+            "path": "/api/hosts/{uuid}",
+            "description": "Get a host by UUID"
+          },
+          {
+            "key": "hosts:clone",
+            "kind": "write",
+            "method": "POST",
+            "path": "/api/hosts/actions/clone",
+            "description": "Clone host"
+          },
+          {
+            "key": "hosts:reorder",
+            "kind": "write",
+            "method": "POST",
+            "path": "/api/hosts/actions/reorder",
+            "description": "Reorder hosts"
+          },
+          {
+            "key": "hosts:delete",
+            "kind": "write",
+            "method": "DELETE",
+            "path": "/api/hosts/{uuid}",
+            "description": "Delete a host by UUID"
+          },
+          {
+            "key": "hosts:bulk-delete",
+            "kind": "write",
+            "method": "POST",
+            "path": "/api/hosts/bulk/delete",
+            "description": "Delete hosts by UUIDs"
+          },
+          {
+            "key": "hosts:bulk-disable",
+            "kind": "write",
+            "method": "POST",
+            "path": "/api/hosts/bulk/disable",
+            "description": "Disable hosts by UUIDs"
+          },
+          {
+            "key": "hosts:bulk-enable",
+            "kind": "write",
+            "method": "POST",
+            "path": "/api/hosts/bulk/enable",
+            "description": "Enable hosts by UUIDs"
+          },
+          {
+            "key": "hosts:bulk-update",
+            "kind": "write",
+            "method": "PATCH",
+            "path": "/api/hosts/bulk/update",
+            "description": "Update many hosts"
+          }
+        ]
+      },
+      {
+        "resource": "system",
+        "resourceScopes": [
+          "system:*",
+          "system:read",
+          "system:write"
+        ],
+        "endpoints": [
+          {
+            "key": "system:metadata",
+            "kind": "read",
+            "method": "GET",
+            "path": "/api/system/metadata",
+            "description": "Get Remnawave Information"
+          },
+          {
+            "key": "system:configuration",
+            "kind": "read",
+            "method": "GET",
+            "path": "/api/system/configuration",
+            "description": "Get Remnawave Configuration"
+          },
+          {
+            "key": "system:stats",
+            "kind": "read",
+            "method": "GET",
+            "path": "/api/system/stats",
+            "description": "Get Stats"
+          },
+          {
+            "key": "system:bandwidth-stats",
+            "kind": "read",
+            "method": "GET",
+            "path": "/api/system/stats/bandwidth",
+            "description": "Get Bandwidth Stats"
+          },
+          {
+            "key": "system:nodes-statistics",
+            "kind": "read",
+            "method": "GET",
+            "path": "/api/system/stats/nodes",
+            "description": "Get Nodes Statistics"
+          },
+          {
+            "key": "system:remnawave-health",
+            "kind": "read",
+            "method": "GET",
+            "path": "/api/system/health",
+            "description": "Get Remnawave Health"
+          },
+          {
+            "key": "system:nodes-metrics",
+            "kind": "read",
+            "method": "GET",
+            "path": "/api/system/nodes/metrics",
+            "description": "Get Nodes Metrics"
+          },
+          {
+            "key": "system:generate-x25519",
+            "kind": "read",
+            "method": "GET",
+            "path": "/api/system/tools/x25519/generate",
+            "description": "Generate 30 X25519 keypairs"
+          },
+          {
+            "key": "system:test-srr-matcher",
+            "kind": "write",
+            "method": "POST",
+            "path": "/api/system/testers/srr-matcher",
+            "description": "Test SRR Matcher"
+          },
+          {
+            "key": "system:recap",
+            "kind": "read",
+            "method": "GET",
+            "path": "/api/system/stats/recap",
+            "description": "Get Recap"
+          },
+          {
+            "key": "system:digest",
+            "kind": "read",
+            "method": "GET",
+            "path": "/api/system/stats/digest",
+            "description": "Get Stats Digest"
+          },
+          {
+            "key": "system:http",
+            "kind": "read",
+            "method": "GET",
+            "path": "/api/system/stats/http",
+            "description": "Get HTTP Stats"
+          }
+        ]
+      },
+      {
+        "resource": "keygen",
+        "resourceScopes": [
+          "keygen:*",
+          "keygen:read",
+          "keygen:write"
+        ],
+        "endpoints": [
+          {
+            "key": "keygen:get",
+            "kind": "read",
+            "method": "GET",
+            "path": "/api/keygen",
+            "description": "Get SECRET_KEY for Remnawave Node"
+          }
+        ]
+      }
+    ]
+  },
+  "verification": {
+    "success": true,
+    "checks": [
+      "metadata authentication required",
+      "version/build/source gate verified",
+      "GET nodes response wrapper verified",
+      "GET config-profiles response wrapper verified",
+      "GET hosts response wrapper verified",
+      "node payload has per-node key/certificate, CA certificate and public JWT key only",
+      "keygen rotates per-node credentials without distributing CA private key",
+      "scoped token creates disabled hidden Host with explicit Node/inbound/TLS/h2/XHTTP mode",
+      "scoped GET profile returns detailed config",
+      "scoped list returns new Host for ownership/idempotency check",
+      "enrollment denied GET users",
+      "enrollment denied GET internal-squads",
+      "enrollment denied PATCH hosts",
+      "enrollment denied PATCH nodes",
+      "enrollment denied PATCH config-profiles",
+      "enrollment denied DELETE tokens",
+      "existing profile unchanged by enrollment",
+      "existing host unchanged by enrollment",
+      "existing squad unchanged by enrollment",
+      "existing user identities, subscription and squad membership unchanged",
+      "separate publication scope appends inbound while retaining every old UUID",
+      "separate publication scope enables/unhides exactly owned Host",
+      "publication token cannot read/modify users",
+      "existing Host unchanged after publish/unpublish",
+      "separate rollback DELETE hosts returns204",
+      "separate rollback DELETE nodes returns204",
+      "separate rollback DELETE config-profiles returns204",
+      "admin JWT revokes temporary scope token",
+      "admin JWT revokes temporary scope token",
+      "Invalid camelCase scope rejected400",
+      "Zero-day token rejected400",
+      "API-role scope-catalog denied403"
+    ],
+    "commands": [
+      "python3 node-installer/tests/lab/remna_lab.py start --pull",
+      "python3 node-installer/tests/lab/remna_lab.py connect --network <caller-owned-isolated-network>",
+      "python3 node-installer/tests/lab/remna_lab.py contracts",
+      "python3 node-installer/tests/lab/remna_lab.py stop"
+    ],
+    "limits": "Proves real Panel/Node API, native mTLS, Xray startup and synthetic existing-object preservation. Ubuntu installer/firewall/client data-plane testing is separate.",
+    "productionModules": {
+      "success": true,
+      "checks": [
+        "Real API+Registrar scoped dedicated enrollment",
+        "Read-before-create idempotent rerun",
+        "Rendered localhost8082 XHTTP config running on actual Node3.4.6/Xray26.11.9",
+        "Old profile,Host,Squad unchanged",
+        "Separate8scope publication preserving existing inboundUUIDs",
+        "Idempotent publication rerun",
+        "Synthetic publication reverted; records hidden"
+      ],
+      "nodeVersions": {
+        "xray": "26.11.9",
+        "node": "3.4.6"
+      },
+      "publishScopes": [
+        "system:metadata",
+        "nodes:get",
+        "config-profiles:get",
+        "hosts:get",
+        "hosts:update",
+        "internal-squads:list",
+        "internal-squads:get",
+        "internal-squads:update"
+      ],
+      "productionChanges": "NONE"
+    },
+    "unitCommand": "PYTHONPATH=node-installer/src python3 -m unittest discover -s node-installer/tests -p test_*.py -v",
+    "unitTestsPassedAtLastRun": 32
+  },
+  "sources": [
+    "https://github.com/remnawave/backend/blob/6853666801d6d1925b6aec55824106100485777a/src/modules/api-tokens/api-tokens.controllers.ts",
+    "https://github.com/remnawave/backend/blob/6853666801d6d1925b6aec55824106100485777a/src/modules/api-tokens/api-tokens.service.ts",
+    "https://github.com/remnawave/backend/blob/6853666801d6d1925b6aec55824106100485777a/src/modules/api-tokens/scope-catalog.service.ts",
+    "https://github.com/remnawave/backend/blob/6853666801d6d1925b6aec55824106100485777a/libs/contract/commands/api-tokens/get-ott.command.ts",
+    "https://github.com/remnawave/backend/blob/6853666801d6d1925b6aec55824106100485777a/libs/contract/commands/config-profiles/create-config-profile.command.ts",
+    "https://github.com/remnawave/backend/blob/6853666801d6d1925b6aec55824106100485777a/libs/contract/commands/nodes/create.command.ts",
+    "https://github.com/remnawave/backend/blob/6853666801d6d1925b6aec55824106100485777a/libs/contract/commands/nodes/get-node.command.ts",
+    "https://github.com/remnawave/backend/blob/6853666801d6d1925b6aec55824106100485777a/libs/contract/commands/nodes/node.response.ts",
+    "https://github.com/remnawave/backend/blob/6853666801d6d1925b6aec55824106100485777a/libs/contract/commands/hosts/create.command.ts",
+    "https://github.com/remnawave/backend/blob/6853666801d6d1925b6aec55824106100485777a/libs/contract/commands/hosts/update.command.ts",
+    "https://github.com/remnawave/backend/blob/6853666801d6d1925b6aec55824106100485777a/libs/contract/commands/internal-squads/update-internal-squad.command.ts",
+    "https://github.com/remnawave/backend/blob/6853666801d6d1925b6aec55824106100485777a/src/modules/system/system.controller.ts"
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "metadata": {
+    "version": "3.4.11",
+    "build": {
+      "time": "2026-11-14T00:48:04Z",
+      "number": "230"
+    },
+    "git": {
+      "backend": {
+        "commitSha": "6853666801d6d1925b6aec55824106100485777a",
+        "branch": "main",
+        "commitUrl": "https://github.com/remnawave/backend/commit/6853666801d6d1925b6aec55824106100485777a"
+      },
+      "frontend": {
+        "commitSha": "20fabab0d788af97273d646614c6b9980f6f29d1",
+        "commitUrl": "https://github.com/remnawave/frontend/commit/20fabab0d788af97273d646614c6b9980f6f29d1"
+      }
+    }
+  },
+  "nodeStatusFields": [
+    "uuid",
+    "id",
+    "name",
+    "address",
+    "port",
+    "proxyUrl",
+    "isConnected",
+    "isConnecting",
+    "isDisabled",
+    "lastStatusChange",
+    "lastStatusMessage",
+    "trafficResetDay",
+    "consumptionMultiplier",
+    "nodeConsumptionMultiplier",
+    "isTrafficTrackingActive",
+    "trafficLimitBytes",
+    "trafficUsedBytes",
+    "notifyPercent",
+    "note",
+    "viewPosition",
+    "countryCode",
+    "tags",
+    "integrationUuids",
+    "ips",
+    "createdAt",
+    "updatedAt",
+    "configProfile",
+    "providerUuid",
+    "provider",
+    "activePluginUuid",
+    "xrayUptime",
+    "usersOnline",
+    "system",
+    "versions"
+  ],
+  "nodeVersions": {
+    "xray": "26.11.9",
+    "node": "3.4.6"
+  },
+  "squadResponseKeys": [
+    "uuid",
+    "viewPosition",
+    "name",
+    "tags",
+    "info",
+    "inbounds",
+    "createdAt",
+    "updatedAt"
+  ],
+  "enrollmentScopes": [
+    "system:metadata",
+    "nodes:list",
+    "nodes:get",
+    "nodes:create",
+    "config-profiles:list",
+    "config-profiles:get",
+    "config-profiles:create",
+    "keygen:get",
+    "hosts:list",
+    "hosts:create"
+  ],
+  "publishScopes": [
+    "hosts:get",
+    "hosts:update",
+    "internal-squads:list",
+    "internal-squads:get",
+    "internal-squads:update"
+  ],
+  "rollbackScopes": [
+    "hosts:delete",
+    "nodes:delete",
+    "config-profiles:delete"
+  ],
+  "checks": [
+    "metadata authentication required",
+    "version/build/source gate verified",
+    "GET nodes response wrapper verified",
+    "GET config-profiles response wrapper verified",
+    "GET hosts response wrapper verified",
+    "node payload has per-node key/certificate, CA certificate and public JWT key only",
+    "keygen rotates per-node credentials without distributing CA private key",
+    "scoped token creates disabled hidden Host with explicit Node/inbound/TLS/h2/XHTTP mode",
+    "scoped GET profile returns detailed config",
+    "scoped list returns new Host for ownership/idempotency check",
+    "enrollment denied GET users",
+    "enrollment denied GET internal-squads",
+    "enrollment denied PATCH hosts",
+    "enrollment denied PATCH nodes",
+    "enrollment denied PATCH config-profiles",
+    "enrollment denied DELETE tokens",
+    "existing profile unchanged by enrollment",
+    "existing host unchanged by enrollment",
+    "existing squad unchanged by enrollment",
+    "existing user identities, subscription and squad membership unchanged",
+    "separate publication scope appends inbound while retaining every old UUID",
+    "separate publication scope enables/unhides exactly owned Host",
+    "publication token cannot read/modify users",
+    "existing Host unchanged after publish/unpublish",
+    "separate rollback DELETE hosts returns204",
+    "separate rollback DELETE nodes returns204",
+    "separate rollback DELETE config-profiles returns204",
+    "admin JWT revokes temporary scope token",
+    "admin JWT revokes temporary scope token"
+  ],
+  "scope": "Isolated synthetic Docker API/Node fixture. No production calls or credentials.",
+  "success": true
+}

@@ -1,0 +1,122 @@
+{
+  "installer_sha256": "5f83521ec35b9f83bba0ffddfb47a0ceb01deac1bd87219f277b81177a66d067",
+  "scope": "real isolated Ubuntu/QEMU only; no production changes",
+  "evidence_count": 24,
+  "boundaries": [
+    "Real isolated Remnawave3.4.11 API; no production enrollment or production changes.",
+    "Ubuntu AMD64 only; ARM64 package metadata checked, ARM64 runtime not tested.",
+    "Jammy reboot evidence on earlier candidate required fixture DNS repair; final5f83 installed/read back afterward. Noble final5f83 reboot passed automatically with persistent fixture DNS.",
+    "Public Internet VPN egress not proved by this operator. ACME, actual subscription traffic and final timer flow belong to the independent API-agent report.",
+    "Early port/idempotency/external-isolation evidence records earlier candidates; final5f83 netfilter first-install/reposition and actual noble boot/local restore were separately verified."
+  ],
+  "verified_cases": {
+    "noble-final-netfilter-namespace.json": {
+      "candidate_sha256": "[safe summary in test-report.md]",
+      "real_fresh_guest_network_namespace": true,
+      "state_unchanged": true,
+      "families": {
+        "iptables": {
+          "initial_owned_hook_first": true,
+          "policies_before": [],
+          "repositioned_owned_hook_first": true,
+          "single_owned_hook_after_repeat": true,
+          "foreign_ACCEPT_preserved": true,
+          "policies_unchanged": true
+        },
+        "ip6tables": {
+          "initial_owned_hook_first": true,
+          "policies_before": [],
+          "repositioned_owned_hook_first": true,
+          "single_owned_hook_after_repeat": true,
+          "foreign_ACCEPT_preserved": true,
+          "policies_unchanged": true
+        }
+      }
+    },
+    "noble-compose-recovery.json": {
+      "returncode": 0,
+      "elapsed_seconds": 106.8,
+      "before": {
+        "simulated_removals": [],
+        "Compose_absent": true,
+        "engine_version": "29.9.2",
+        "engine_stayed_active": true
+      },
+      "after": {
+        "engine_version": "29.9.2",
+        "compose_version": "2.40.3",
+        "packages": "[safe summary in test-report.md]"
+      }
+    },
+    "noble-bad-provided-TLS.json": {
+      "returncode": 2,
+      "elapsed_seconds": 60.1,
+      "wrong_SAN_cert_from_trusted_test_CA_rejected": true,
+      "active_TLS_pair_unchanged": true,
+      "same_identity_resources_native_key": true,
+      "error": "[safe summary in test-report.md]"
+    },
+    "noble-SIGTERM-retry.json": {
+      "signal": "SIGTERM",
+      "process_group_returncode": 143,
+      "real_operation_lock_observed": true,
+      "output": "Terminated\n",
+      "retry_returncode": 0,
+      "retry_elapsed_seconds": 69.8,
+      "same_identity_resources_native_key": true,
+      "lock_released_and_retry_succeeded": true
+    },
+    "noble-local-rollback-restore.json": {
+      "remove": {
+        "status": "OWN_RUNTIME_STOPPED",
+        "snapshot": "[safe summary in test-report.md]",
+        "docker_dependencies": "retained",
+        "remote_records": "[safe summary in test-report.md]",
+        "ssh_firewall_policies": "unchanged"
+      },
+      "restore": {
+        "status": "OWN_SNAPSHOT_RESTORED",
+        "snapshot": "[safe summary in test-report.md]"
+      },
+      "Docker_and_SSH_retained": true,
+      "foreign_IPv4_IPv6_sentinels_retained": true,
+      "same_identity_resources_native_and_TLS_keys": true,
+      "policies_unchanged": true,
+      "doctor_status": "LOCAL_CHECKS_PASS",
+      "native_panel": "ONLINE"
+    },
+    "noble-final-secret-mode-scan.json": {
+      "known_API_and_native_private_credentials_absent_from_CLI_logs": true,
+      "restored_CLI_exact_final_sha256": true
+    }
+  },
+  "final_ca_only_candidate": "556a5ba3df35892cac49bf946fe8889640bea538522996a32e303544bdc5d69a",
+  "final_ubuntu24_readback": {
+    "version": "24.04",
+    "candidate_sha256": "556a5ba3df35892cac49bf946fe8889640bea538522996a32e303544bdc5d69a",
+    "returncode": 0,
+    "elapsed_seconds": 63.5,
+    "same_install_id": true,
+    "same_resource_ids": true,
+    "same_native_key": true,
+    "installed_CLI_sha256": "556a5ba3df35892cac49bf946fe8889640bea538522996a32e303544bdc5d69a",
+    "status": "READY_FOR_TESTING",
+    "published": false
+  },
+  "final_ubuntu24_doctor": {
+    "CLI_sha256": "556a5ba3df35892cac49bf946fe8889640bea538522996a32e303544bdc5d69a",
+    "status": "LOCAL_CHECKS_PASS",
+    "panel_live": "ONLINE",
+    "versions": {
+      "xray": "26.11.9",
+      "node": "3.4.6"
+    },
+    "host_visibility": {
+      "isDisabled": true,
+      "isHidden": true
+    },
+    "DNS": "PASS",
+    "TLS": "PASS",
+    "local_HTTPS": "PASS"
+  }
+}

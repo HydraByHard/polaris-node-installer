@@ -1,0 +1,25 @@
+{
+  "plan": "docs/plan.md",
+  "state": "IMPLEMENTED_INFRA_VERIFIED_DATA_PLANE_UNCONFIRMED",
+  "production_changes": "NONE",
+  "tasks": {
+    "research": "complete; source-backed native3.4.11 contracts;29realAPIassertionsPASS",
+    "core_render": "complete;83unit/releasechecksPASS",
+    "api_registrar": "complete;actualensure/idempotency/publish/unpublish/recoveryPASS",
+    "system_cli": "complete;realUbuntu22/24and20failurematrixPASS",
+    "vm_lab": "complete;final556Ubuntu24warmreadback+Ubuntu22freshACMEandinstalledtimerPASS;controlledVPNpayloadcurl28UNRESOLVED",
+    "release": "signedlocalpackage;GitHubcreateRepositoryDENIEDbyintegration;noexistingdownloadURL"
+  },
+  "rulings": [
+    "Native OTT is not enrollment. Use native1-day scoped create-only token onlyRAM; state exact expiry/reuse limitation, no false self-revocation claim.",
+    "Fresh profile/inbound perNode, hidden+disabledHost, no existingSquad changes during install.",
+    "Private parent repository staysprivate; anypublicexport includes only installer subtree aftersecretscan.",
+    "Developmenthas no authenticatedproductionAPIcredential; live metadata401 is recordedUNKNOWN, runtime muststrictlyverifyversionbeforemutations."
+  ],
+  "review": "5Important fixed RED->GREEN; Minor readability deferred; see docs/implementation-ledger.md",
+  "remaining": "Data-plane privateCA diagnosis; freshACME CLI/timer; finalexport+GitHubpublication",
+  "blockers": [
+    "GITHUB_CREATE_REPOSITORY_PERMISSION",
+    "CONTROLLED_VPN_PAYLOAD_TIMEOUT_CAUSE_UNRESOLVED"
+  ]
+}

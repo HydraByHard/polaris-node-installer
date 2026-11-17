@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# Follow Your Polaris — verify the release SHA256 from a trusted independent report BEFORE execution.
+set -euo pipefail
+umask 077
+export LC_ALL=C
+if [[ $(id -u) -eq 0 ]]; then
+  pni_temp=$(mktemp -d /run/polaris-exec.XXXXXXXX)
+else
+  pni_temp=$(mktemp -d)
+fi
+cleanup() { rm -rf -- "$pni_temp"; }
+trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+pni_source=$(readlink -f -- "$0")
+awk 'f {print} /^__POLARIS_PAYLOAD__$/ {f=1}' "$pni_source" | base64 -d > "$pni_temp/app.pyz"
+printf '%s  %s\n' PAYLOAD_HASH "$pni_temp/app.pyz" | sha256sum -c - >/dev/null || { echo 'Corrupted embedded release; nothing executed.' >&2; exit 2; }
+if ! command -v python3 >/dev/null 2>&1; then
+  if [[ "${1:-install}" != install ]]; then echo 'Python3 required; install via trusted Ubuntu APT.' >&2; exit 2; fi
+  test "$(id -u)" -eq 0 || { echo 'Use sudo or root native console.' >&2; exit 2; }
+  . /etc/os-release
+  [[ "${ID:-}" == ubuntu && ( "${VERSION_ID:-}" == 22.04 || "${VERSION_ID:-}" == 24.04 ) ]] || { echo 'Unsupported Ubuntu.' >&2; exit 2; }
+  export DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=l
+  apt-get update >/dev/null
+  apt-get install -y --no-install-recommends python3 >/dev/null
+fi
+export POLARIS_RELEASE_SOURCE="$pni_source"
+python3 -I "$pni_temp/app.pyz" "$@"
+exit $?
+__POLARIS_PAYLOAD__

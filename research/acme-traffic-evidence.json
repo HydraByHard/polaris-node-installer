@@ -1,0 +1,65 @@
+{
+  "candidateSha256": "556a5ba3df35892cac49bf946fe8889640bea538522996a32e303544bdc5d69a",
+  "productionChanges": "NONE",
+  "ubuntu": "22.04",
+  "fullCli": {
+    "result": "PASS",
+    "scope": "Fresh PNI state on existing Ubuntu/Docker dependencies; cold OS/Docker separately verified in BYO run.",
+    "automaticAcmeIssue": true,
+    "status": "READY_FOR_TESTING",
+    "nativeNodeOnline": true,
+    "hostHiddenAndDisabled": true,
+    "freshInstallIdentity": true,
+    "freshNativeKey": true,
+    "apiCredentialFoundInStateOrOutput": false
+  },
+  "component": {
+    "issueAndRealRenew": "PASS",
+    "strictTls": true,
+    "nginxPresentedBothNewSerials": true,
+    "alpn": "h2",
+    "storedByoConfigUnchanged": true
+  },
+  "installedTimer": {
+    "success": true,
+    "flow": "Installed timer -> service -> actual CLI _renew -> Certbot HTTP-01 -> atomic TLS pair exchange -> Nginx reload",
+    "timerEnabled": true,
+    "timerTriggered": true,
+    "serviceResult": "success",
+    "serviceExitStatus": "0",
+    "serialChanged": true,
+    "nginxPresentedRenewedSerial": true,
+    "alpn": "h2",
+    "strictTls": true,
+    "forcing": "Temporary private renew_before_expiry and 3s installed-timer test drop-in",
+    "doctor": "LOCAL_CHECKS_PASS",
+    "calendarRestored": true
+  },
+  "controlledVpnProbe": {
+    "result": "INCONCLUSIVE",
+    "curlExit": 28,
+    "responseReceived": false,
+    "strictOuterTls": true,
+    "h2XhttpGetAndPostStatus200": true,
+    "nativeCredentialDelivered": true,
+    "controlledRangesTried": [
+      "198.18.0.0/15",
+      "203.0.113.0/24"
+    ],
+    "explicitPniDirectFallbackFixed": false,
+    "publicInternetOrHiddifyInteroperabilityClaimed": false
+  },
+  "cleanup": {
+    "syntheticSubscriberSquadHostRemoved": true,
+    "temporaryClientRemoved": true,
+    "transientRoutingRuleRemoved": true,
+    "extraEgressNetworksRemoved": true,
+    "originalNginxConfigRestored": true,
+    "renewalThresholdRestored": true,
+    "timerCalendarRestored": true
+  },
+  "fixtureNotes": [
+    "TCG guest clock aligned with controller for Pebble exact NotBefore; strict certificate verification preserved.",
+    "Xray26.11.9 embedded default root pool required temporary Doctor client useSystemCA=true; fixed in candidate556."
+  ]
+}

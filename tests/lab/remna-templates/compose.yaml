@@ -1,0 +1,70 @@
+# Only the adjacent remna_lab.py fixture supplies these synthetic lab values.
+x-service: &service
+  restart: unless-stopped
+  environment:
+    HTTP_PROXY: ''
+    HTTPS_PROXY: ''
+    ALL_PROXY: ''
+    http_proxy: ''
+    https_proxy: ''
+    all_proxy: ''
+    NO_PROXY: '*'
+    no_proxy: '*'
+  logging:
+    driver: json-file
+    options: {max-size: 10m, max-file: '3'}
+services:
+  database:
+    <<: *service
+    image: ${POSTGRES_IMAGE:?}
+    environment:
+      POSTGRES_USER: lab
+      POSTGRES_DB: lab
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?}
+    volumes: [database:/var/lib/postgresql]
+    healthcheck:
+      test: [CMD-SHELL, pg_isready -U lab -d lab]
+      interval: 2s
+      timeout: 2s
+      retries: 40
+  valkey:
+    <<: *service
+    image: ${VALKEY_IMAGE:?}
+    command: [valkey-server, --save, '', --appendonly, 'no', --unixsocket, /var/run/valkey/valkey.sock, --unixsocketperm, '777', --port, '0']
+    volumes: [socket:/var/run/valkey]
+    healthcheck:
+      test: [CMD, valkey-cli, -s, /var/run/valkey/valkey.sock, ping]
+      interval: 2s
+      timeout: 2s
+      retries: 40
+  backend:
+    <<: *service
+    image: ${BACKEND_IMAGE:?}
+    env_file: backend.env
+    volumes: [socket:/var/run/valkey]
+    depends_on:
+      database: {condition: service_healthy}
+      valkey: {condition: service_healthy}
+  node:
+    <<: *service
+    image: ${NODE_IMAGE:?}
+    env_file: node.env
+  subscription:
+    <<: *service
+    image: ${SUBSCRIPTION_IMAGE:?}
+    env_file: subscription.env
+  gateway:
+    <<: *service
+    image: ${NGINX_IMAGE:?}
+    networks: [default, ingress]
+    ports: ['127.0.0.1:${HTTPS_PORT:?}:8443']
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./tls:/etc/nginx/tls:ro
+networks:
+  default:
+    internal: true
+  ingress: {}
+volumes:
+  database:
+  socket:

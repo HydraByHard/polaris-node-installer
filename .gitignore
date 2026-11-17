@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+.lab/
+dist/
+.coverage
+.env
+.env.*
+*.env
+*.key
+*.pem
+fixture.json
+client.json
+state.json
+*.qcow2
+*.img
+!release-signing-public.pem

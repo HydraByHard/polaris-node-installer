@@ -1,0 +1,22 @@
+{
+  "component": "Disposable real Remnawave API lab",
+  "ownership": "Project-owned test support; generated credentials and TLS keys are synthetic and stay outside the checkout.",
+  "base": {
+    "adaptedFrom": "scripts/remnawave-integration.py in the original project repository",
+    "revision": "1875e52",
+    "includedAs": "remna_base.py",
+    "scope": "Only Docker lifecycle, synthetic environment setup, local trusted HTTPS, API requests, waiting and scoped cleanup functions. No runtime dependency on the original checkout."
+  },
+  "resources": [
+    "remna-templates/compose.yaml",
+    "remna-templates/nginx.conf",
+    "remna-templates/pins.json"
+  ],
+  "officialBackendContractRevision": "6853666801d6d1925b6aec55824106100485777a",
+  "officialSources": [
+    "https://github.com/remnawave/backend/commit/6853666801d6d1925b6aec55824106100485777a",
+    "https://docs.rw/api/",
+    "https://docs.rw/install/remnawave-node/"
+  ],
+  "imagePolicy": "Six official images pinned by digest. Panel 3.4.11, Node 3.4.6, subscription page 8.0.1, PostgreSQL 18.7, Valkey 8.1.11, Nginx 1.30.6."
+}
