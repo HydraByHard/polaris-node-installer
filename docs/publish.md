@@ -49,7 +49,7 @@ Fingerprint публичного signing key закреплён в довере�
 
 ```bash
 gh release create v1.0.0 --repo HydraByHard/polaris-node-installer --target main --draft --title 'Polaris Node Installer 1.0.0' --notes-file release-notes.md
-gh release upload v1.0.0 --repo HydraByHard/polaris-node-installer polaris-install.sh polaris-install.sh.sig release-signing-public.pem polaris-node-installer-1.0.0-source.tar.gz test-report.md report.txt security-scan.json SHA256SUMS SHA256SUMS.sig
+gh release upload v1.0.0 --repo HydraByHard/polaris-node-installer polaris-install.sh polaris-install.sh.sig release-signing-public.pem polaris-node-installer-1.0.0-source.tar.gz polaris-node-installer-1.0.0.tar.gz test-report.md report.txt security-scan.json release-notes.md SHA256SUMS SHA256SUMS.sig
 gh release edit v1.0.0 --repo HydraByHard/polaris-node-installer --draft=false --prerelease
 gh release view v1.0.0 --repo HydraByHard/polaris-node-installer --json url,assets
 ```
